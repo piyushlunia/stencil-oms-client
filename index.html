@@ -7922,7 +7922,10 @@ function acKey(e, inputId, type){
 // ── PRODUCT LINE AUTOCOMPLETE ──
 function acLineProdShow(inp){
   const q=inp.value.toLowerCase();
-  const drop=inp.closest('.om-pline').querySelector('.omLineProdDrop');
+  const _ln=inp.closest('.om-pline');
+  const _hv=_ln.querySelector('.omLineProdVal'); if(_hv) _hv.value='';
+  const _pc=_ln.querySelector('.omLineParentCode'); if(_pc) _pc.value='';
+  const drop=_ln.querySelector('.omLineProdDrop');
   if(!drop)return;
   if(!q.trim()){drop.style.display='none';return;}
   const matches=products.filter(p=>(p.code||'').toLowerCase().includes(q)||(p.name||'').toLowerCase().includes(q));
@@ -8297,7 +8300,7 @@ function openOrderModal(id=null){
     const _cmEdit=customers.find(c=>c.name===o.customer);
     if(!_isBillerRole&&billerEl) billerEl.value=o.biller||(_cmEdit&&_cmEdit.biller)||'';
     if(!_isSalesRole&&salesEl) salesEl.value=o.salesExec||(_cmEdit&&_cmEdit.salesExec)||'';
-    addProductLine(false, o.product, o.qty, o.eta);
+    addProductLine(false, o.orderedCode||o.product, o.qty, o.eta);
   } else {
     // New order — start with one blank line
     addProductLine(false);
@@ -8401,6 +8404,7 @@ function saveOrder(){
         o.customer=cust;
       }
       o.product=first.prod;
+      o.orderedCode=first.orderedCode;
       o.vendor=getVendor(first.prod)||o.vendor;
       const prevEtaEdit=o.eta;
       // Keep original qty (the split covers the addition); if qty reduced just update
