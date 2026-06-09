@@ -16003,17 +16003,17 @@ function _updateChipStates(){
 
     if(typeof showToast==='function') showToast('⏳ Syncing '+(newRecs.length+updRecs.length)+' records to server…','info');
     let ok=0, fail=0;
-    for(const rec of newRecs){
-      try{
-        const res = await _req('POST', ep, mkPl(rec));
-        if(res && res.data && res.data._id) rec._id = res.data._id;
-        ok++;
-      }catch(e){ fail++; console.warn('bulk-import POST err:',e); }
-    }
-    for(const rec of updRecs){
-      try{ await _req('PUT', ep+'/'+rec._id, mkPl(rec)); ok++; }
-      catch(e){ fail++; console.warn('bulk-import PUT err:',e); }
-    }
+    const _total=newRecs.length+updRecs.length;
+    // Sync in PARALLEL batches (10 at a time) so large imports finish in seconds, not minutes
+    const _batch=async (items, fn)=>{
+      for(let i=0;i<items.length;i+=10){
+        const res=await Promise.allSettled(items.slice(i,i+10).map(fn));
+        res.forEach(r=>{ if(r.status==='fulfilled') ok++; else { fail++; console.warn('bulk-import err:',r.reason); } });
+        if(typeof showToast==='function' && _total>50 && i>0 && i%100===0) showToast('⏳ Syncing… '+(ok+fail)+'/'+_total,'info');
+      }
+    };
+    await _batch(newRecs, async rec=>{ const res=await _req('POST', ep, mkPl(rec)); if(res && res.data && res.data._id) rec._id=res.data._id; });
+    await _batch(updRecs, async rec=>{ await _req('PUT', ep+'/'+rec._id, mkPl(rec)); });
     if(typeof showToast==='function'){
       const msg = fail ? '⚠️ Synced '+ok+', failed '+fail : '✅ Synced '+ok+' records to server';
       showToast(msg, fail?'warning':'success');
