@@ -5369,7 +5369,7 @@ function renderEtaEditedCard(){
 
     // Row middle: product + qty + ETA timeline + slip badge + overdue badge
     html+='<div style="display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap">';
-    html+='<span style="font-size:11px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">📦 '+_escHtml(o.product||'—')+'</span>';
+    html+='<span style="font-size:11px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">📦 '+_escHtml(o.orderedCode||o.product||'—')+'</span>';
     if(o.qty) html+='<span style="font-size:10px;color:#94a3b8;background:#f1f5f9;border-radius:4px;padding:1px 6px">×'+o.qty+'</span>';
     html+='<span style="font-size:10px;color:#94a3b8">|</span>';
     html+='<span style="font-size:10px;color:#94a3b8;text-decoration:line-through">'+fmtShort(r.origEta||'—')+'</span>';
